@@ -126,6 +126,8 @@ define({
 	"EditorThemes": "Themes",
 	"Import": "Import",
 	"Import a theme": "Import a theme",
+	"Export": "Export",
+	"Export a theme": "Export a theme",
 	"fileManagement" : "File Management",
 	"typing": "Typing",
 	"autoSave": "Auto Save",

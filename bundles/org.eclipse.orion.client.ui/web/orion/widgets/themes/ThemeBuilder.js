@@ -105,6 +105,16 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			
 			});
 			
+			var exportCommand = new mCommands.Command({
+				name: messages.Export,
+				tooltip: messages['Export a theme'],
+				id: "orion.exportTheme", //$NON-NLS-0$
+				callback: function(data){
+					this.exportTheme(data.items);
+				}.bind(this)
+			
+			});
+			
 			this.commandService.addCommand(guideCommand);
 			this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			
@@ -113,6 +123,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this.commandService.addCommand(exportCommand);
+			this.commandService.registerCommandContribution('themeCommands', "orion.exportTheme", 5); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 
 		function applyColor(){
@@ -965,6 +978,56 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				fontsizepicker.destroy();
 			}		
 		};
+
+		ThemeBuilder.prototype.exportTheme = exportTheme;
+		
+		function exportTheme(data){
+			var background = "";
+			var keyword = "";
+			var foreground = "";
+			var string = "";
+			var singleLineComment = "";
+			var lineNumber = "";
+			var selectionBackground = "";
+			var dat = {};
+			for( var z in zones ){
+				if( !zones[z].paintchip ){ 
+					console.log(zones[z]); 
+					var zone = zones[z];
+					if(zone.family == 'lineNumber' && !dat.hasOwnProperty('lineNumber')){// Line Numbers
+						dat['lineNumber'] = zone.fill;
+					}else if(zone.family == 'background' && !dat.hasOwnProperty('background')){
+						dat['background'] = zone.fill;
+					}else if(zone.family == 'string' && !dat.hasOwnProperty('string')){ // Strings, CSS Value
+						dat['string'] = zone.fill;
+					}else if(zone.family == 'text' && !dat.hasOwnProperty('text')){ // Foreground, CSS Class Name, CSS Attribute,CSS Text, CSS Class Name
+						dat['foreground'] = zone.fill;
+					}else if(zone.family == 'currentLine' && !dat.hasOwnProperty('currentLine')){ // 
+						dat['selectionBackground'] = zone.fill;
+					}else if(zone.family == 'comment' && !dat.hasOwnProperty('comment')){
+						dat['singleLineComment'] = zone.fill;
+					}else if(zone.family == 'keyword' && !dat.hasOwnProperty('keyword')){ // HTML Tag, Keywords, CSS Class Name
+						dat['keyword'] = zone.fill;
+					}else if(zone.family == 'overviewRuler' && !dat.hasOwnProperty('overviewRuler')){
+						dat['overviewRuler'] = zone.fill;
+					}else if(zone.family == 'annotationRuler' && !dat.hasOwnProperty('annotationRuler')){ // Annotation Ruler
+						dat['annotationRuler'] = zone.fill;
+					}else if(zone.family == 'attribute' && !dat.hasOwnProperty('attribute')){
+						dat['attribute'] = zone.fill;
+					}
+				}
+			}
+			// During import, a color of background is used for both overviewRuler, anntationRuler. Export them for future enhancement.
+			// During import, attribute is not handled. Export it for future enhancement.
+			var currentStyle = '<colorTheme id="0" name="yourTheme"><background color="#background"/><singleLineComment color="#singleLineComment"/>' + 
+			'<keyword color="#keyword"/><foreground color="#foreground"/><string color="#string"/><lineNumber color="#lineNumber"/><selectionBackground color="#selectionBackground"/>' +
+			'<overviewRuler color="#overviewRuler"/><annotationRuler color="#annotationRuler"/><attribute color="#attribute"/>' + 
+			'</colorTheme>';
+			for(var key in dat){
+				currentStyle = currentStyle.replace('#' + key, dat[key]);
+		    }
+			window.alert(currentStyle);
+		}
 
 		return ThemeBuilder;
 	}
