@@ -128,6 +128,8 @@ define({
 	"Import a theme": "Import a theme",
 	"Export": "Export",
 	"Export a theme": "Export a theme",
+	"Theme name:": "Theme name:",
+	"yourTheme": "yourTheme",
 	"fileManagement" : "File Management",
 	"typing": "Typing",
 	"autoSave": "Auto Save",

@@ -52,7 +52,9 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		var familyvalue;
 
 		Family.prototype.name = familyname;
-		Family.prototype.value = familyvalue;		
+		Family.prototype.value = familyvalue;
+		
+		var newExportThemeNameParameter = new mCommandRegistry.ParametersDescription([new mCommandRegistry.CommandParameter('name', 'text', messages['Theme name:'], messages['yourTheme'])]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		function ThemeBuilder(args){
 	
@@ -109,8 +111,15 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 				name: messages.Export,
 				tooltip: messages['Export a theme'],
 				id: "orion.exportTheme", //$NON-NLS-0$
+				parameters: newExportThemeNameParameter,
 				callback: function(data){
-					this.exportTheme(data.items);
+					var themeName;
+					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+					    themeName = data.parameters.valueFor('name');//$NON-NLS-0$
+					}else{
+					    themeName = 'yourTheme';//$NON-NLS-0$
+					}
+					this.exportTheme(data.items, themeName);
 				}.bind(this)
 			
 			});
@@ -979,40 +988,39 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 			}		
 		};
 
-		ThemeBuilder.prototype.exportTheme = exportTheme;
-		
-		function exportTheme(data){
+		function exportTheme(data, themeName){
 			var dat = {};
 			for( var z in zones ){
 				if( !zones[z].paintchip ){ 
 					console.log(zones[z]); 
 					var zone = zones[z];
 					if(zone.family === 'lineNumber' && !dat.hasOwnProperty('lineNumber')){
-						dat['lineNumber'] = zone.fill;
+						dat.lineNumber = zone.fill;
 					}else if(zone.family === 'background' && !dat.hasOwnProperty('background')){
-						dat['background'] = zone.fill;
+						dat.background = zone.fill;
 					}else if(zone.family === 'string' && !dat.hasOwnProperty('string')){
-						dat['string'] = zone.fill;
+						dat.string = zone.fill;
 					}else if(zone.family === 'text' && !dat.hasOwnProperty('text')){
-						dat['foreground'] = zone.fill;
+						dat.foreground = zone.fill;
 					}else if(zone.family === 'currentLine' && !dat.hasOwnProperty('currentLine')){
-						dat['selectionBackground'] = zone.fill;
+						dat.selectionBackground = zone.fill;
 					}else if(zone.family === 'comment' && !dat.hasOwnProperty('comment')){
-						dat['singleLineComment'] = zone.fill;
+						dat.singleLineComment = zone.fill;
 					}else if(zone.family === 'keyword' && !dat.hasOwnProperty('keyword')){
-						dat['keyword'] = zone.fill;
+						dat.keyword = zone.fill;
 					}else if(zone.family === 'overviewRuler' && !dat.hasOwnProperty('overviewRuler')){
-						dat['overviewRuler'] = zone.fill;
+						dat.overviewRuler = zone.fill;
 					}else if(zone.family === 'annotationRuler' && !dat.hasOwnProperty('annotationRuler')){
-						dat['annotationRuler'] = zone.fill;
+						dat.annotationRuler = zone.fill;
 					}else if(zone.family === 'attribute' && !dat.hasOwnProperty('attribute')){
-						dat['attribute'] = zone.fill;
+						dat.attribute = zone.fill;
 					}
 				}
 			}
+			dat.themeName = themeName;
 			// During import, a color of background is used for both overviewRuler, anntationRuler. Export them for future enhancement.
 			// During import, attribute is not handled. Export it for future enhancement.
-			var currentStyle = '<colorTheme id="0" name="yourTheme"><background color="#background"/><singleLineComment color="#singleLineComment"/>' +
+			var currentStyle = '<colorTheme id="0" name="#themeName"><background color="#background"/><singleLineComment color="#singleLineComment"/>' +
 			'<keyword color="#keyword"/><foreground color="#foreground"/><string color="#string"/><lineNumber color="#lineNumber"/><selectionBackground color="#selectionBackground"/>' +
 			'<overviewRuler color="#overviewRuler"/><annotationRuler color="#annotationRuler"/><attribute color="#attribute"/>' + 
 			'</colorTheme>';
@@ -1021,6 +1029,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/commandRegi
 		    }
 			window.alert(currentStyle);
 		}
+		
+		ThemeBuilder.prototype.exportTheme = exportTheme;
 
 		return ThemeBuilder;
 	}
